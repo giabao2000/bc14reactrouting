@@ -1,25 +1,49 @@
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import { Route, Switch, withRouter } from "react-router-dom";
+import { renderRoutesHome, renderRoutesAdmin } from "./routes";
+import { actTryLogin } from "./containers/AdminTemplate/AuthPage/modules/actions";
+import { useEffect, Suspense, lazy } from "react";
+import { useDispatch } from "react-redux";
+import Loader from "./components/Loader";
 
-function App() {
+function App(props) {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(actTryLogin(props.history));
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Suspense fallback={<Loader></Loader>}>
+      <Switch>
+        <Route
+          path="/auth"
+          component={lazy(() => import("./containers/AdminTemplate/AuthPage"))}
+        />
+
+        <Route
+          path="/login"
+          component={lazy(() => import("./containers/HomeTemplate/LoginPage"))}
+        />
+
+        <Route
+          path="/register"
+          component={lazy(() =>
+            import("./containers/HomeTemplate/RegisterPage")
+          )}
+        />
+
+        {renderRoutesHome()}
+
+        {renderRoutesAdmin()}
+
+        <Route
+          path=""
+          component={lazy(() => import("./containers/PageNotFound"))}
+        />
+      </Switch>
+    </Suspense>
   );
 }
 
-export default App;
+export default withRouter(App);
